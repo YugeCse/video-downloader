@@ -14,6 +14,14 @@
         "./src/*"
       ]
     },
-    "baseUrl": "."
+    "baseUrl": ".",
+    "types": [
+      "chrome",
+      "node"
+    ],
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "ignoreDeprecations": "6.0",
   }
 }
