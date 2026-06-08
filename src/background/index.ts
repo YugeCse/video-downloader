@@ -1,7 +1,7 @@
 import { sendToContentScript } from "@plasmohq/messaging"
 
 import { MSG_GET_ASSET_URL } from "~constanst/global-constants"
-import type { AssetUrlInfo } from "~globals"
+import type { AssetUrlInfo } from "~types/globals"
 
 console.log(`后台进程运行中...`)
 
@@ -9,7 +9,7 @@ console.log(`后台进程运行中...`)
 const saveUrls: Array<AssetUrlInfo> = []
 
 /** 是否有一样的URL */
-const isContains = (tabId?: number, url?: string): boolean =>
+const isContains = (tabId: number | null, url: string | null): boolean =>
   saveUrls.indexOf({ sourceTabId: tabId, url: url }) != -1
 
 /** 请求的链接筛选器 */

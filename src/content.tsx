@@ -4,8 +4,8 @@ import { useEffect, useState } from "react"
 
 import { sendToBackground } from "@plasmohq/messaging"
 
+import type { AssetUrlInfo, GetActiveTabsMessageInfo } from "~/types/globals"
 import { MSG_GET_ASSET_URL } from "~constanst/global-constants"
-import type { AssetUrlInfo, GetActiveTabsMessageInfo } from "~globals"
 
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"],
@@ -54,18 +54,17 @@ const PlasmoOverlay = () => {
     if (activeTabs == null || activeTabs.length == 0) {
       return //没有获取到当前激活的Tab信息，直接返回
     }
-    setTargetUrls([]) //清空数据源
     setActiveTabId(activeTabs[0].id) //设计当前的 TabId
   }
   const getAssetUrlsInformation = () => {
     chrome.runtime.onMessage.addListener((msg, _, __) => {
       if (msg.name == MSG_GET_ASSET_URL) {
-        let targetUrls = msg.body as Array<AssetUrlInfo>
-        if (targetUrls == null || targetUrls.length == 0) {
+        let callbackUrls = msg.body as AssetUrlInfo[]
+        if (callbackUrls == null || callbackUrls.length == 0) {
           return //没有获取到数据URL，直接返回
         }
         setTargetUrls(
-          targetUrls.filter((item) => item.sourceTabId == activeTabId)
+          callbackUrls.filter((item) => item.sourceTabId === activeTabId)
         ) //设置获取到的数据源
       }
     })
@@ -75,16 +74,25 @@ const PlasmoOverlay = () => {
     getAssetUrlsInformation() //筛选当前Tab中的资源路径URL
   })
   return (
-    <div className="plasmo-w-[300px] plasmo-z-50 plasmo-flex plasmo-flex-row plasmo-items-center plasmo-fixed plasmo-top-32 plasmo-right-0 plasmo-bg-black plasmo-overflow-hidden plasmo-rounded-xl">
+    <div className="plasmo-w-3 hover:plasmo-w-[300px] plasmo-z-50 plasmo-flex plasmo-flex-row plasmo-items-center plasmo-fixed plasmo-top-32 plasmo-right-0 plasmo-bg-transparent hover:plasmo-bg-black hover:plasmo-border hover:plasmo-border-gray-800 plasmo-overflow-hidden plasmo-rounded-xl plasmo-transform plasmo-transition-transform">
       <div className="plasmo-w-1 plasmo-h-10 plasmo-bg-blue-400 plasmo-rounded-xl plasmo-mx-1"></div>
-      <ul className="plasmo-flex-1 plasmo-flex plasmo-flex-col plasmo-w-[300px] plasmo-h-60 plasmo-overflow-x-hidden plasmo-overflow-y-auto">
-        {targetUrls.map((item, index) => (
-          <li
-            key={index}
-            className="plasmo-text-wrap plasmo-text-white plasmo-px-3 plasmo-py-3 plasmo-border-b plasmo-border-white">
-            {item.url}
-          </li>
-        ))}
+      <ul className="plasmo-flex-1 plasmo-flex plasmo-flex-col plasmo-w-[300px] plasmo-h-60 plasmo-items-center plasmo-justify-center plasmo-overflow-x-hidden plasmo-overflow-y-auto">
+        {targetUrls.length == 0 ? (
+          <span className="plasmo-text-white plasmo-text-center">
+            😯 抱歉，
+            <br />
+            <br />
+            这里什么都没有～
+          </span>
+        ) : (
+          targetUrls.map((item, index) => (
+            <li
+              key={index}
+              className="plasmo-text-wrap plasmo-text-white plasmo-px-3 plasmo-py-3 plasmo-border-b plasmo-border-white hover:plasmo-bg-gray-700">
+              {item.url}
+            </li>
+          ))
+        )}
       </ul>
     </div>
   )

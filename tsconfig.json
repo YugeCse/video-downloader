@@ -4,9 +4,11 @@
     "node_modules"
   ],
   "include": [
-    ".plasmo/index.d.ts",
+    ".plasmo/**/*",
     "./**/*.ts",
-    "./**/*.tsx"
+    "./**/*.tsx",
+    "src/**/*",
+    "globals.d.ts"
   ],
   "compilerOptions": {
     "paths": {
