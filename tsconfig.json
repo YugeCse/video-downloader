@@ -4,6 +4,7 @@
     "node_modules"
   ],
   "include": [
+    ".plasmo/index.d.ts",
     ".plasmo/**/*",
     "./**/*.ts",
     "./**/*.tsx",
@@ -24,6 +25,6 @@
     "typeRoots": [
       "./node_modules/@types"
     ],
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "6.0"
   }
 }

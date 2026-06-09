@@ -6,6 +6,12 @@ import { sendToBackground } from "@plasmohq/messaging"
 
 import type { AssetUrlInfo, GetActiveTabsMessageInfo } from "~/types/globals"
 import { MSG_GET_ASSET_URL } from "~constanst/global-constants"
+import { getFileIcon } from "~utils/file_ext"
+import {
+  getBasename,
+  getBasenameWithoutExt,
+  getExtName
+} from "~utils/uri-utils"
 
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"],
@@ -44,6 +50,7 @@ export const getStyle = (): HTMLStyleElement => {
 }
 
 const PlasmoOverlay = () => {
+  const [contentVisible, setContentVisible] = useState(false)
   const [activeTabId, setActiveTabId] = useState<number | null>(null)
   const [targetUrls, setTargetUrls] = useState<Array<AssetUrlInfo>>([])
   const getActiveTabInformation = async () => {
@@ -74,9 +81,20 @@ const PlasmoOverlay = () => {
     getAssetUrlsInformation() //筛选当前Tab中的资源路径URL
   })
   return (
-    <div className="plasmo-w-3 hover:plasmo-w-[300px] plasmo-z-50 plasmo-flex plasmo-flex-row plasmo-items-center plasmo-fixed plasmo-top-32 plasmo-right-0 plasmo-bg-transparent hover:plasmo-bg-black hover:plasmo-border hover:plasmo-border-gray-800 plasmo-overflow-hidden plasmo-rounded-xl plasmo-transform plasmo-transition-transform">
+    <div
+      className="plasmo-h-60 plasmo-z-50 plasmo-flex plasmo-flex-row plasmo-items-center plasmo-fixed plasmo-top-32 plasmo-right-0 plasmo-bg-transparent hover:plasmo-bg-black hover:plasmo-border hover:plasmo-border-gray-800 plasmo-rounded-xl plasmo-transform plasmo-transition-transform plasmo-overflow-hidden"
+      onMouseEnter={() => setContentVisible(true)}
+      onMouseLeave={() => setContentVisible(false)}>
       <div className="plasmo-w-1 plasmo-h-10 plasmo-bg-blue-400 plasmo-rounded-xl plasmo-mx-1"></div>
-      <ul className="plasmo-flex-1 plasmo-flex plasmo-flex-col plasmo-w-[300px] plasmo-h-60 plasmo-items-center plasmo-justify-center plasmo-overflow-x-hidden plasmo-overflow-y-auto">
+      <div
+        className={[
+          `plasmo-h-full plasmo-overflow-x-hidden plasmo-overflow-y-auto`,
+          targetUrls.length != 0 && `plasmo-justify-start`,
+          targetUrls.length == 0 && `plasmo-justify-center`,
+          !contentVisible && `plasmo-hidden`,
+          contentVisible &&
+            `plasmo-flex plasmo-flex-1 plasmo-flex-col plasmo-items-center plasmo-w-[300px] plasmo-overflow-hidden`
+        ].join(" ")}>
         {targetUrls.length == 0 ? (
           <span className="plasmo-text-white plasmo-text-center">
             😯 抱歉，
@@ -85,15 +103,40 @@ const PlasmoOverlay = () => {
             这里什么都没有～
           </span>
         ) : (
-          targetUrls.map((item, index) => (
-            <li
-              key={index}
-              className="plasmo-text-wrap plasmo-text-white plasmo-px-3 plasmo-py-3 plasmo-border-b plasmo-border-white hover:plasmo-bg-gray-700">
-              {item.url}
-            </li>
-          ))
+          <div className="plasmo-w-full plasmo-h-full plasmo-flex plasmo-flex-col plasmo-overflow-hidden">
+            <div className="plasmo-px-3 plasmo-py-2.5 plasmo-font-bold plasmo-text-lg plasmo-text-white plasmo-border-b plasmo-border-gray-700">
+              资源链接
+            </div>
+            <ul className="plasmo-w-full plasmo-flex-1 plasmo-overflow-y-auto plasmo-overscroll-y-auto">
+              {targetUrls.map((item, index) => (
+                <li
+                  key={index}
+                  data-url={item.url}
+                  title={getBasename(item.url)}
+                  className="plasmo-w-full plasmo-flex plasmo-flex-row plasmo-text-white plasmo-px-3 plasmo-py-3 plasmo-border-b plasmo-border-white hover:plasmo-bg-gray-700 hover:plasmo-cursor-pointer">
+                  <img
+                    className="plasmo-size-5 plasmo-mr-2"
+                    src={getFileIcon(getExtName(item.url))}
+                  />
+                  <span
+                    style={{
+                      display: "-webkit-box",
+                      WebkitBoxOrient: "vertical"
+                    }}
+                    className="plasmo-flex-1 plasmo-text-start plasmo-line-clamp-2 plasmo-text-ellipsis plasmo-text-wrap plasmo-overflow-hidden ">
+                    {getBasenameWithoutExt(item.url)}
+                  </span>
+                  <button
+                    className="plasmo-border plasmo-rounded-lg plasmo-px-3 plasmo-py-1 
+                  plasmo-bg-gray-700 hover:plasmo-bg-gray-200 plasmo-text-white hover:plasmo-text-black active:plasmo-bg-gray-400">
+                    下载
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
-      </ul>
+      </div>
     </div>
   )
 }
